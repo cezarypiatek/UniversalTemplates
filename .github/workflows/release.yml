@@ -33,21 +33,21 @@ jobs:
         minor-pattern: '^(?!(Fix|Tech))/i'
         major-pattern: 'BREAKING CHANGES'
         output-to-env-variable: 'Version'    
-    - name: Materialize Signing Key
-      id: write_sign_key_file
-      uses: timheuer/base64-to-file@v1
-      with:
-        fileName: 'Key.snk'
-        encodedString: ${{ secrets.SIGNING_KEY }}
+    # - name: Materialize Signing Key
+    #   id: write_sign_key_file
+    #   uses: timheuer/base64-to-file@v1
+    #   with:
+    #     fileName: 'Key.snk'
+    #     encodedString: ${{ secrets.SIGNING_KEY }}
     - name: Restore dependencies
       run: |
         dotnet nuget locals all --clear
         dotnet restore $env:SolutionPath         
     - name: Build extension
       run: dotnet build $env:SolutionPath 
-      env:
-        SignAssembly: true
-        AssemblyOriginatorKeyFile: ${{ steps.write_sign_key_file.outputs.filePath }}     
+      # env:
+      #   SignAssembly: true
+      #   AssemblyOriginatorKeyFile: ${{ steps.write_sign_key_file.outputs.filePath }}     
     - name: Generate release note
       run: |
         git fetch --prune
