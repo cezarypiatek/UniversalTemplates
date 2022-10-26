@@ -39,7 +39,7 @@ internal class Program
         var templateArgumentsOptions = new Option<string[]>("--arguments");
         transformCommand.AddOption(templateArgumentsOptions);
         
-        transformCommand.SetHandler(async (string valuesPath, string templatePath, string outputPath, string[] sourceMetadata, string[] arguments) =>
+        transformCommand.SetHandler(async (valuesPath, templatePath, outputPath, sourceMetadata, arguments) =>
         {
             IDataSourceReader reader = Path.GetExtension(valuesPath).ToLower() switch
             {
@@ -60,7 +60,7 @@ internal class Program
             var dataSourcePayload = await File.ReadAllTextAsync(valuesPath);
             var templatePayload = await File.ReadAllTextAsync(templatePath);
 
-            var data = reader.Read(new Source()
+            var data = reader.Read(new Source
             {
                 Content = dataSourcePayload,
                 Path = valuesPath,
