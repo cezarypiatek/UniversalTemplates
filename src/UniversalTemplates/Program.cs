@@ -51,9 +51,10 @@ internal class Program
                 _ => throw new NotSupportedException("Not supported data source")
             };
 
-            var templateEngine = Path.GetExtension(templatePath).ToLower() switch
+            IUniversalTemplate templateEngine = Path.GetExtension(templatePath).ToLower() switch
             {
                 ".liquid" => new FluidUniversalTemplate(),
+                ".handlebars" or ".hbs" => new HandlebarsUniversalTemplate(),
                 _ => throw new NotSupportedException("Not supported template engine")
             };
 
