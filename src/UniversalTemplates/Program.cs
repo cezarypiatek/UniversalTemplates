@@ -35,8 +35,11 @@ internal class Program
         var sourceMetadataOption = new Option<string[]>("--inputOptions") {AllowMultipleArgumentsPerToken = true};
         transformCommand.AddOption(sourceMetadataOption);
 
+
+        var templateArgumentsOptions = new Option<string[]>("--arguments");
+        transformCommand.AddOption(templateArgumentsOptions);
         
-        transformCommand.SetHandler(async (string valuesPath, string templatePath, string outputPath, string[] sourceMetadata) =>
+        transformCommand.SetHandler(async (string valuesPath, string templatePath, string outputPath, string[] sourceMetadata, string[] arguments) =>
         {
             IDataSourceReader reader = Path.GetExtension(valuesPath).ToLower() switch
             {
@@ -61,13 +64,13 @@ internal class Program
             {
                 Content = dataSourcePayload,
                 Path = valuesPath,
-                SourceMetadata = sourceMetadata.Select(x => x.Split('=', 2)).ToDictionary(x => x[0], x => x[1]) ?? new Dictionary<string, string>()
+                SourceMetadata = ToDictionary(sourceMetadata)
             });
 
             var result = templateEngine.Transform(templatePayload, new UniversalTemplateContext()
             {
                 data = data,
-                arguments = new Dictionary<string, string?>(),
+                arguments = ToDictionary(arguments),
                 env = GetEnvironmentVariables()
             });
 
@@ -81,7 +84,7 @@ internal class Program
             }
 
 
-        }, valuesOptions, templateOptions, outputOptions, sourceMetadataOption);
+        }, valuesOptions, templateOptions, outputOptions, sourceMetadataOption, templateArgumentsOptions);
         
         rootCommand.AddCommand(transformCommand);
         rootCommand.SetHandler(() =>
@@ -92,12 +95,17 @@ internal class Program
         _ = await rootCommand.InvokeAsync(args);
     }
 
-    private static IReadOnlyDictionary<string, string?> GetEnvironmentVariables()
+    private static Dictionary<string, string> ToDictionary(string[] sourceMetadata)
     {
-        var result = new Dictionary<string, string?>();
+        return sourceMetadata.Select(x => x.Split('=', 2)).ToDictionary(x => x[0], x => x[1]) ?? new Dictionary<string, string>();
+    }
+
+    private static IReadOnlyDictionary<string, string> GetEnvironmentVariables()
+    {
+        var result = new Dictionary<string, string>();
         foreach (DictionaryEntry entry in Environment.GetEnvironmentVariables())
         {
-            result[entry.Key.ToString()!] = entry.Value?.ToString();
+            result[entry.Key.ToString()!] = entry.Value!.ToString()!;
         }
         return result;
     }
