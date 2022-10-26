@@ -13,7 +13,7 @@
   <Description>Universal Tool for transforming templates using various data source and template engines</Description>
   <PackAsTool>true</PackAsTool>
   <ToolCommandName>universaltemplates</ToolCommandName>
-  <PackageOutputPath>./nupkg</PackageOutputPath>
+  <RollForward>LatestMajor</RollForward>
   </PropertyGroup>
   <ItemGroup>
      <PackageReference Include="Microsoft.Data.SqlClient" Version="5.0.1" />

@@ -6,7 +6,7 @@ namespace UniversalTemplates.Core;
 [InitOnly]
 internal class Source
 {
-    public string Path { get; set; }
-    public string Content { get; set; }
-    public Dictionary<string, string> SourceMetadata { get; set; }
+    public string Path { get; set; } = null!;
+    public string Content { get; set; } = null!;
+    public Dictionary<string, string> SourceMetadata { get; set; } = null!;
 }
