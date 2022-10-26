@@ -14,12 +14,14 @@
   <PackAsTool>true</PackAsTool>
   <ToolCommandName>universaltemplates</ToolCommandName>
   <RollForward>LatestMajor</RollForward>
+  <LangVersion>10</LangVersion>
   </PropertyGroup>
   <ItemGroup>
      <PackageReference Include="Handlebars.Net" Version="2.1.2" />
      <PackageReference Include="Microsoft.Data.SqlClient" Version="5.0.1" />
      <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
      <PackageReference Include="Fluid.Core" Version="2.2.16" />
+     <PackageReference Include="Mono.TextTemplating" Version="2.3.0" />
      <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
      <PackageReference Include="Scriban" Version="5.5.0" />
      <PackageReference Include="SmartAnalyzers.CSharpExtensions.Annotations" Version="4.2.7" />

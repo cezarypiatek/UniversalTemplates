@@ -1,13 +1,14 @@
 ﻿using Scriban;
 using UniversalTemplates.Core;
+using Template = UniversalTemplates.Core.Template;
 
 namespace UniversalTemplates.TemplateEngines;
 
 class ScribanUniversalTemplate: IUniversalTemplate
 {
-    public string Transform(string template, UniversalTemplateContext context)
+    public string Transform(Template template, UniversalTemplateContext context)
     {
-        var sTemplate = Template.Parse(template);
+        var sTemplate = Scriban.Template.Parse(template.Content);
         return sTemplate.Render(context);
     }
 }

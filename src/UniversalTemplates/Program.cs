@@ -56,6 +56,7 @@ internal class Program
                 ".liquid" => new FluidUniversalTemplate(),
                 ".handlebars" or ".hbs" => new HandlebarsUniversalTemplate(),
                 ".scriban" or ".sbn" => new ScribanUniversalTemplate(),
+                ".t4" => new T4UniversalTemplate(),
                 _ => throw new NotSupportedException("Not supported template engine")
             };
 
@@ -69,7 +70,11 @@ internal class Program
                 SourceMetadata = ToDictionary(sourceMetadata)
             });
 
-            var result = templateEngine.Transform(templatePayload, new UniversalTemplateContext()
+            var result = templateEngine.Transform(new Template()
+            {
+                Content = templatePayload,
+                FilePath = templatePath
+            }, new UniversalTemplateContext()
             {
                 data = data,
                 arguments = ToDictionary(arguments),
