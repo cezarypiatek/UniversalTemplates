@@ -55,6 +55,7 @@ internal class Program
             {
                 ".liquid" => new FluidUniversalTemplate(),
                 ".handlebars" or ".hbs" => new HandlebarsUniversalTemplate(),
+                ".scriban" or ".sbn" => new ScribanUniversalTemplate(),
                 _ => throw new NotSupportedException("Not supported template engine")
             };
 
