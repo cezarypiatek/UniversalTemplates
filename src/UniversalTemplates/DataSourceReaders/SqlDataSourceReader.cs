@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Data.SqlClient;
 using UniversalTemplates.Core;
@@ -10,12 +11,29 @@ class SqlDataSourceReader : IDataSourceReader
     public object? Read(Source source)
     {
         var data = new List<Dictionary<string, object>>();
-
-        using var myConnection = new SqlConnection(source.SourceMetadata["ConnectionString"]);
+        if (source.SourceMetadata.TryGetValue("ConnectionString", out var connectionString) == false)
+        {
+            throw new InvalidOperationException("Missing ConnectionString in inputOptions");
+        }
+        using var myConnection = new SqlConnection(connectionString);
         var query = source.Content;
-        var oCmd = new SqlCommand(query, myConnection);
+        var sqlCommand = new SqlCommand(query, myConnection);
+
+
+        foreach (var (key, value) in source.SourceMetadata)
+        {
+            if (key.StartsWith("@"))
+            {
+                _ = sqlCommand.Parameters.Add(new SqlParameter
+                {
+                    ParameterName = key,
+                    Value = value
+                });
+            }
+        }
+
         myConnection.Open();
-        using var oReader = oCmd.ExecuteReader();
+        using var oReader = sqlCommand.ExecuteReader();
         var columnSchema = oReader.GetColumnSchema();
         var headers = columnSchema.Select(x => x.ColumnName).ToArray();
         while (oReader.Read())

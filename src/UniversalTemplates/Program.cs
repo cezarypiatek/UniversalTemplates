@@ -39,7 +39,7 @@ internal class Program
         var templateArgumentsOptions = new Option<string[]>("--arguments");
         transformCommand.AddOption(templateArgumentsOptions);
         
-        transformCommand.SetHandler(async (string valuesPath, string templatePath, string outputPath, string[] sourceMetadata, string[] arguments) =>
+        transformCommand.SetHandler(async (valuesPath, templatePath, outputPath, sourceMetadata, arguments) =>
         {
             IDataSourceReader reader = Path.GetExtension(valuesPath).ToLower() switch
             {
@@ -51,23 +51,30 @@ internal class Program
                 _ => throw new NotSupportedException("Not supported data source")
             };
 
-            var templateEngine = Path.GetExtension(templatePath).ToLower() switch
+            IUniversalTemplate templateEngine = Path.GetExtension(templatePath).ToLower() switch
             {
                 ".liquid" => new FluidUniversalTemplate(),
+                ".handlebars" or ".hbs" => new HandlebarsUniversalTemplate(),
+                ".scriban" or ".sbn" => new ScribanUniversalTemplate(),
+                ".t4" => new T4UniversalTemplate(),
                 _ => throw new NotSupportedException("Not supported template engine")
             };
 
             var dataSourcePayload = await File.ReadAllTextAsync(valuesPath);
             var templatePayload = await File.ReadAllTextAsync(templatePath);
 
-            var data = reader.Read(new Source()
+            var data = reader.Read(new Source
             {
                 Content = dataSourcePayload,
                 Path = valuesPath,
                 SourceMetadata = ToDictionary(sourceMetadata)
             });
 
-            var result = templateEngine.Transform(templatePayload, new UniversalTemplateContext()
+            var result = templateEngine.Transform(new Template()
+            {
+                Content = templatePayload,
+                FilePath = templatePath
+            }, new UniversalTemplateContext()
             {
                 data = data,
                 arguments = ToDictionary(arguments),

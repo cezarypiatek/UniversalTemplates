@@ -15,7 +15,9 @@ class CsvDataSourceReader : IDataSourceReader
         using (var csvParser = new TextFieldParser(new StringReader(source.Content)))
         {
             csvParser.TextFieldType = FieldType.Delimited;
-            csvParser.SetDelimiters(",");
+            _ = source.SourceMetadata.TryGetValue("Delimiter", out var delimiter);
+            delimiter ??= ",";
+            csvParser.SetDelimiters(delimiter);
             var headerRow = true;
             IReadOnlyList<string> headers = Array.Empty<string>();
 
