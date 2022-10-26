@@ -15,6 +15,9 @@ class SqlDataSourceReader : IDataSourceReader
         {
             throw new InvalidOperationException("Missing ConnectionString in inputOptions");
         }
+
+        var onlySchemaInfo = source.SourceMetadata.TryGetValue("OnlySchemaInfo", out var schemaInfo) && schemaInfo?.ToLower() == "true";
+
         using var myConnection = new SqlConnection(connectionString);
         var query = source.Content;
         var sqlCommand = new SqlCommand(query, myConnection);
@@ -35,6 +38,12 @@ class SqlDataSourceReader : IDataSourceReader
         myConnection.Open();
         using var oReader = sqlCommand.ExecuteReader();
         var columnSchema = oReader.GetColumnSchema();
+
+        if (onlySchemaInfo)
+        {
+            return columnSchema;
+        }
+
         var headers = columnSchema.Select(x => x.ColumnName).ToArray();
         while (oReader.Read())
         {
