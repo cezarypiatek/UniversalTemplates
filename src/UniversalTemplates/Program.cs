@@ -36,7 +36,10 @@ internal class Program
         transformCommand.AddOption(sourceMetadataOption);
 
 
-        var templateArgumentsOptions = new Option<string[]>("--arguments");
+        var templateArgumentsOptions = new Option<string[]>("--arguments")
+        {
+            AllowMultipleArgumentsPerToken = true
+        };
         transformCommand.AddOption(templateArgumentsOptions);
         
         transformCommand.SetHandler(async (valuesPath, templatePath, outputPath, sourceMetadata, arguments) =>
