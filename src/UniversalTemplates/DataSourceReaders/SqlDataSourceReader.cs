@@ -25,11 +25,12 @@ class SqlDataSourceReader : IDataSourceReader
 
         foreach (var (key, value) in source.SourceMetadata)
         {
-            if (key.StartsWith("@"))
+            if (key.StartsWith("p:") && key.Split(':', 2) is { Length: > 1 } keyParts)
             {
+
                 _ = sqlCommand.Parameters.Add(new SqlParameter
                 {
-                    ParameterName = key,
+                    ParameterName = "@"+ keyParts[1],
                     Value = value
                 });
             }
