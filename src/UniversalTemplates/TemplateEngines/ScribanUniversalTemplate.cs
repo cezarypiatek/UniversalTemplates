@@ -6,7 +6,7 @@ namespace UniversalTemplates.TemplateEngines;
 
 class ScribanUniversalTemplate: IUniversalTemplate
 {
-    public string Transform(Template template, UniversalTemplateContext context)
+    public string Transform(Template template, object? context)
     {
         var sTemplate = Scriban.Template.Parse(template.Content);
         return sTemplate.Render(context);

@@ -6,7 +6,7 @@ namespace UniversalTemplates.TemplateEngines;
 
 class FluidUniversalTemplate : IUniversalTemplate
 {
-    public string Transform(Template template, UniversalTemplateContext context)
+    public string Transform(Template template, object? context)
     {
         var options = new TemplateOptions();
         var parser = new FluidParser();
