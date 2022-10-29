@@ -16,7 +16,6 @@ namespace UniversalTemplates;
 public class Program
 {
 
-    // TODO: merge data source
     // TODO: file for defining transformation of multiple files
     // TODO: generate output file name base on the template - stripe the extension
     static async Task Main(string[] args)
@@ -60,7 +59,7 @@ public class Program
                     Content = p.content,
                     Path = p.path,
                     SourceMetadata = ToDictionary(sourceMetadata)
-                })).OfType<object>();
+                })).OfType<object>().ToArray();
 
 
             var data = MergeInputs(inputData);
@@ -111,8 +110,13 @@ public class Program
         _ = await rootCommand.InvokeAsync(args);
     }
 
-    private static object? MergeInputs(IEnumerable<object> inputData)
+    internal static object? MergeInputs(IReadOnlyList<object> inputData)
     {
+        if (inputData.Count() < 2)
+        {
+            return inputData.FirstOrDefault();
+        }
+
         if (inputData.All(x => x is IDictionary<string, object>))
         {
             var result = new Dictionary<string, object>();
@@ -127,12 +131,13 @@ public class Program
             return result;
         }
 
-        if (inputData.Count() < 2)
+        if (inputData.All(x => x is IEnumerable<object>))
         {
-            return inputData.FirstOrDefault();
+            return inputData.SelectMany(x => (x as IEnumerable<object>)!).Where(x => x != null).ToArray();
+
         }
 
-        return inputData.SelectMany(x => (x as IEnumerable<object>)!).Where(x=> x!= null).ToArray();
+        throw new InvalidOperationException("Cannot merge data sources with different format");
     }
 
     private static IDataSourceReader GetDataReader(string valuesPath)
