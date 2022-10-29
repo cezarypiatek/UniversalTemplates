@@ -5,7 +5,7 @@ namespace UniversalTemplates.TemplateEngines;
 
 class T4UniversalTemplate: IUniversalTemplate
 {
-    public string Transform(Template template, UniversalTemplateContext context)
+    public string Transform(Template template, object? context)
     {
         var generator = new TemplateGenerator();
         var parsed = generator.ParseTemplate(template.FilePath, template.Content);

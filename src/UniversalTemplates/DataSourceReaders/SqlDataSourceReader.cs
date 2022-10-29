@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using Microsoft.Data.SqlClient;
 using UniversalTemplates.Core;
@@ -19,9 +20,12 @@ class SqlDataSourceReader : IDataSourceReader
         var onlySchemaInfo = source.SourceMetadata.TryGetValue("OnlySchemaInfo", out var schemaInfo) && schemaInfo?.ToLower() == "true";
 
         using var myConnection = new SqlConnection(connectionString);
-        var query = source.Content;
-        var sqlCommand = new SqlCommand(query, myConnection);
+        myConnection.Open();
+        using var tx = myConnection.BeginTransaction();
+        
 
+        var query = source.Content;
+        var sqlCommand = new SqlCommand(query, myConnection, tx);
 
         foreach (var (key, value) in source.SourceMetadata)
         {
@@ -36,8 +40,7 @@ class SqlDataSourceReader : IDataSourceReader
             }
         }
 
-        myConnection.Open();
-        using var oReader = sqlCommand.ExecuteReader();
+        using var oReader = sqlCommand.ExecuteReader(onlySchemaInfo? CommandBehavior.SchemaOnly: CommandBehavior.Default);
         var columnSchema = oReader.GetColumnSchema();
 
         if (onlySchemaInfo)

@@ -4,7 +4,7 @@ namespace UniversalTemplates.Core;
 
 interface IUniversalTemplate
 {
-    string Transform(Template template, UniversalTemplateContext context);
+    string Transform(Template template, object? context);
 }
 
 [InitRequired]

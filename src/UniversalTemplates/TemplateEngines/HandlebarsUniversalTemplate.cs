@@ -5,7 +5,7 @@ namespace UniversalTemplates.TemplateEngines;
 
 class HandlebarsUniversalTemplate: IUniversalTemplate
 {
-    public string Transform(Template template, UniversalTemplateContext context)
+    public string Transform(Template template, object? context)
     {
         var hTemplate = Handlebars.Compile(template.Content);
         return hTemplate(context);
