@@ -20,8 +20,9 @@ class SqlDataSourceReader : IDataSourceReader
         var onlySchemaInfo = source.SourceMetadata.TryGetValue("OnlySchemaInfo", out var schemaInfo) && schemaInfo?.ToLower() == "true";
 
         using var myConnection = new SqlConnection(connectionString);
-        using var tx = myConnection.BeginTransaction();
         myConnection.Open();
+        using var tx = myConnection.BeginTransaction();
+        
 
         var query = source.Content;
         var sqlCommand = new SqlCommand(query, myConnection, tx);
