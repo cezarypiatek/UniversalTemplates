@@ -17,7 +17,6 @@ public class Program
 {
 
     // TODO: file for defining transformation of multiple files
-    // TODO: generate output file name base on the template - stripe the extension
     static async Task Main(string[] args)
     {
         var rootCommand = new RootCommand("UniversalTemplates command-line");
@@ -50,9 +49,12 @@ public class Program
         var skipContextOption = new Option<bool>("--doNotWrapInputInContext");
         transformCommand.AddOption(skipContextOption);
         
-        transformCommand.SetHandler(async (valuesPath, templatePath, outputPath, sourceMetadata, arguments, skipContext, templateEngineName) =>
+        var deriveOutputFromTemplateOption = new Option<bool>("--deriveOutputFromTemplate");
+        transformCommand.AddOption(deriveOutputFromTemplateOption);
+        
+        transformCommand.SetHandler(async (valuesPathGlob, templatePathGlob, outputPath, sourceMetadata, arguments, skipContext, templateEngineName, deriveOutputFromTemplate) =>
         {
-            var inputData = ExpandPath(valuesPath)
+            var inputData = ExpandPath(valuesPathGlob)
                 .Select(p => (path:p, content: File.ReadAllText(p)))
                 .Select(p => GetDataReader(p.path).Read(new Source
                 {
@@ -64,42 +66,53 @@ public class Program
 
             var data = MergeInputs(inputData);
 
-
-            var templatePayload = await File.ReadAllTextAsync(templatePath);
-            IUniversalTemplate templateEngine = (templateEngineName?.ToLower() ?? Path.GetExtension(templatePath).ToLower().Trim().TrimStart('.')) switch
+            foreach (var templatePath in ExpandPath(templatePathGlob))
             {
-                "liquid" => new FluidUniversalTemplate(),
-                "handlebars" or "hbs" => new HandlebarsUniversalTemplate(),
-                "scriban" or "sbn" => new ScribanUniversalTemplate(),
-                "t4" => new T4UniversalTemplate(),
-                _ => throw new NotSupportedException("Not supported template engine")
-            };
-            var result = templateEngine.Transform
-            (
-                template: new Template
+                var templatePayload = await File.ReadAllTextAsync(templatePath);
+                IUniversalTemplate templateEngine = (templateEngineName?.ToLower() ?? Path.GetExtension(templatePath).ToLower().Trim().TrimStart('.')) switch
                 {
-                    Content = templatePayload,
-                    FilePath = templatePath
-                },
-                context: skipContext ? data : new UniversalTemplateContext()
+                    "liquid" => new FluidUniversalTemplate(),
+                    "handlebars" or "hbs" => new HandlebarsUniversalTemplate(),
+                    "scriban" or "sbn" => new ScribanUniversalTemplate(),
+                    "t4" => new T4UniversalTemplate(),
+                    _ => throw new NotSupportedException("Not supported template engine")
+                };
+                var result = templateEngine.Transform
+                (
+                    template: new Template
+                    {
+                        Content = templatePayload,
+                        FilePath = templatePath
+                    },
+                    context: skipContext ? data : new UniversalTemplateContext()
+                    {
+                        data = data,
+                        arguments = ToDictionary(arguments),
+                        env = GetEnvironmentVariables()
+                    }
+                );
+
+                if (deriveOutputFromTemplate)
                 {
-                    data = data,
-                    arguments = ToDictionary(arguments),
-                    env = GetEnvironmentVariables()
+                    var outputFileName = Path.GetFileNameWithoutExtension(templatePath);
+                    await File.WriteAllTextAsync
+                    (
+                        path: Path.Combine(string.IsNullOrWhiteSpace(outputPath) ? Environment.CurrentDirectory : outputPath, outputFileName),
+                        contents: result,
+                        encoding: Encoding.UTF8,
+                        cancellationToken: default
+                    );
                 }
-            );
-
-            if (string.IsNullOrWhiteSpace(outputPath) == false)
-            {
-                await File.WriteAllTextAsync(outputPath, result, Encoding.UTF8, default);
+                else if (string.IsNullOrWhiteSpace(outputPath) == false)
+                {
+                    await File.WriteAllTextAsync(outputPath, result, Encoding.UTF8, default);
+                }
+                else
+                {
+                    Console.WriteLine(result);
+                }
             }
-            else
-            {
-                Console.WriteLine(result);
-            }
-
-
-        }, valuesOptions, templateOptions, outputOptions, sourceMetadataOption, templateArgumentsOptions, skipContextOption, templateEngineOptions);
+        }, valuesOptions, templateOptions, outputOptions, sourceMetadataOption, templateArgumentsOptions, skipContextOption, templateEngineOptions, deriveOutputFromTemplateOption);
         
         rootCommand.AddCommand(transformCommand);
         rootCommand.SetHandler(() =>

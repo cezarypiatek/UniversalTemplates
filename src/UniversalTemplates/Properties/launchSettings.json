@@ -6,7 +6,7 @@
     },
     "Sql": {
       "commandName": "Project",
-      "commandLineArgs": "transform\r\n--input \"C:\\Repositories\\UniversalTemplatesPOC\\UniversalTemplates\\UniversalTemplates.Tests\\Sample.sql\"\r\n--template \"C:\\Repositories\\UniversalTemplatesPOC\\UniversalTemplates\\UniversalTemplates.Tests\\SampleSql.liquid\"\r\n--inputOptions ConnectionString=\"Server=localhost,1444;Database=AdventureWorks;User Id=sa;Password=my_password;TrustServerCertificate=True\""
+      "commandLineArgs": "transform\r\n--input \"C:\\Repositories\\UniversalTemplatesPOC\\UniversalTemplates\\UniversalTemplates.Tests\\Sample.sql\"\r\n--template \"C:\\Repositories\\UniversalTemplatesPOC\\UniversalTemplates\\UniversalTemplates.Tests\\SampleSql.txt.liquid\"\r\n--deriveOutputFromTemplate\r\n--inputOptions ConnectionString=\"Server=localhost,1444;Database=AdventureWorks;User Id=sa;Password=my_password;TrustServerCertificate=True\""
     }
   }
 }
